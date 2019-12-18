@@ -92,13 +92,32 @@
 __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
 {
   /* USER CODE BEGIN 0 */
-  0x00,
+  0x06, 0xFF, 0x00,      /* USAGE_PAGE (Vendor Page: 0xFF00) */                       
+	0x09, 0x01,            /* USAGE (Demo Kit)               */    
+	0xa1, 0x01, /* COLLECTION (Application) */ 
+	/* 6 */ 
+
+	// The Input report 
+	0x09,0x03, // USAGE ID - Vendor defined 
+	0x15,0x00, // LOGICAL_MINIMUM (0) 
+	0x26,0x00, 0xFF, // LOGICAL_MAXIMUM (255) 
+	0x75,0x08, // REPORT_SIZE (8) 
+	0x95,64, // REPORT_COUNT :SendLength 
+	0x81,0x02, // INPUT (Data,Var,Abs) 
+	//19
+	// The Output report 
+	0x09,0x04, // USAGE ID - Vendor defined 
+	0x15,0x00, // LOGICAL_MINIMUM (0) 
+	0x26,0x00,0xFF, // LOGICAL_MAXIMUM (255) 
+	0x75,0x08, // REPORT_SIZE (8) 
+	0x95,64, // REPORT_COUNT:ReceiveLength 
+	0x91,0x02, // OUTPUT (Data,Var,Abs) 
   /* USER CODE END 0 */
   0xC0    /*     END_COLLECTION	             */
 };
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-
+extern unsigned char USB_Event;
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -177,6 +196,7 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
   /* USER CODE BEGIN 6 */
+	USB_Event = 1;
   return (USBD_OK);
   /* USER CODE END 6 */
 }

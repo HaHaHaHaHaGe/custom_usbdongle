@@ -1,0 +1,10 @@
+Removed Pin From Net: NetName=GND Pin=*3-
+Removed Pin From Net: NetName=GND Pin=*3-
+Change Component Comment : Designator=C10 Old Comment=Cap New Comment=0.1uf
+Change Component Comment : Designator=C8 Old Comment=Cap New Comment=22pf
+Change Component Comment : Designator=C9 Old Comment=Cap New Comment=22pf
+Change Component Comment : Designator=R4 Old Comment=Res New Comment=1.5k
+Change Component Comment : Designator=R1 Old Comment=Res New Comment=10k
+Change Component Comment : Designator=R2 Old Comment=Res New Comment=22
+Change Component Comment : Designator=R3 Old Comment=Res New Comment=22
+Added Room: Name=Sheet1

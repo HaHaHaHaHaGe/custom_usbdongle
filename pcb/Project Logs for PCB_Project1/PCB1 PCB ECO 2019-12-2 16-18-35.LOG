@@ -1,0 +1,8 @@
+Added Component: Designator=*2(DIP10)
+Added Pin To Net: NetName=Net*2_1 Pin=*2-1
+Added Pin To Net: NetName=Net*2_2 Pin=*2-2
+Added Pin To Net: NetName=Net*2_3 Pin=*2-3
+Added Pin To Net: NetName=GND Pin=*2-4
+Added Pin To Net: NetName=GND Pin=*2-4
+Added Pin To Net: NetName=GND Pin=*2-4
+Added Member To Class: ClassName=Sheet1 Member=Component *2 USB

@@ -1,5 +1,5 @@
 --cpu Cortex-M0
-"custom_usbdongle\startup_stm32f070x6.o"
+"custom_usbdongle\startup_stm32f042x6.o"
 "custom_usbdongle\main.o"
 "custom_usbdongle\usb_device.o"
 "custom_usbdongle\usbd_conf.o"
@@ -11,6 +11,8 @@
 "custom_usbdongle\stm32f0xx_hal_pcd_ex.o"
 "custom_usbdongle\stm32f0xx_hal_tim.o"
 "custom_usbdongle\stm32f0xx_hal_tim_ex.o"
+"custom_usbdongle\stm32f0xx_hal_uart.o"
+"custom_usbdongle\stm32f0xx_hal_uart_ex.o"
 "custom_usbdongle\stm32f0xx_hal_rcc.o"
 "custom_usbdongle\stm32f0xx_hal_rcc_ex.o"
 "custom_usbdongle\stm32f0xx_hal.o"

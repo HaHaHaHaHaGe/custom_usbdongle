@@ -13,7 +13,7 @@ custom_usbdongle\usbd_custom_hid_if.o: ../Inc/stm32f0xx_hal_conf.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_def.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/CMSIS/Device/ST/STM32F0xx/Include/stm32f0xx.h
-custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/CMSIS/Device/ST/STM32F0xx/Include/stm32f070x6.h
+custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/CMSIS/Device/ST/STM32F0xx/Include/stm32f042x6.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/CMSIS/Include/core_cm0.h
 custom_usbdongle\usbd_custom_hid_if.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/CMSIS/Include/core_cmInstr.h
@@ -35,6 +35,10 @@ custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pcd_ex.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h
+custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim.h
+custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim_ex.h
+custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart.h
+custom_usbdongle\usbd_custom_hid_if.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h
 custom_usbdongle\usbd_custom_hid_if.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h
