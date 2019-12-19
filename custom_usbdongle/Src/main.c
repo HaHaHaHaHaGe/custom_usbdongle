@@ -123,6 +123,7 @@ int main(void)
 		if(USB_Event == 1)
 		{
 			unsigned char len = USB_GetData(USB_Recv,128);
+			memcpy(USB_Send,USB_Recv,64);
 			USB_Event = 0;
 		}
 
