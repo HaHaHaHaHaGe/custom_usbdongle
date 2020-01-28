@@ -59,6 +59,8 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
 extern TIM_HandleTypeDef htim14;
+extern TIM_HandleTypeDef htim16;
+extern DMA_HandleTypeDef hdma_usart2_rx;
 extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
 
@@ -143,6 +145,21 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 channel 4 and 5 interrupts.
+  */
+
+void DMA1_Channel4_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel4_5_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel4_5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_rx);
+  /* USER CODE BEGIN DMA1_Channel4_5_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel4_5_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM14 global interrupt.
   */
 void TIM14_IRQHandler(void)
@@ -154,6 +171,20 @@ void TIM14_IRQHandler(void)
   /* USER CODE BEGIN TIM14_IRQn 1 */
 
   /* USER CODE END TIM14_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM16 global interrupt.
+  */
+void TIM16_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM16_IRQn 0 */
+
+  /* USER CODE END TIM16_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim16);
+  /* USER CODE BEGIN TIM16_IRQn 1 */
+
+  /* USER CODE END TIM16_IRQn 1 */
 }
 
 /**
@@ -186,17 +217,51 @@ void USB_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 extern unsigned char UART_Recv[512];
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	HAL_UART_Receive_IT(huart, UART_Recv, 1);
-}
+extern unsigned char UART_Recv_u8;
+extern int UART_Recvloc;
+extern USBD_HandleTypeDef hUsbDeviceFS;
+unsigned int count = 0;
+unsigned char recv_last;
+unsigned char count_recv  =0;
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	//USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, UART_Recv,huart->RxXferSize);
+//	UART_Recv[UART_Recvloc++] = UART_Recv_u8;
+//	if(UART_Recvloc == 256)
+//		UART_Recvloc = 0;
+//	
+//	if(recv_last == 0xfe && UART_Recv_u8 == 0xfe)
+//		count_recv++;
+//	else
+//		count_recv = 0;
+//	if(count_recv == 4)
+//	{
+//		count_recv = 0;
+//		if(UART_Recvloc > 192)
+//		{
+//			UART_Recvloc = 0;
+//		}
+//	}
+//	recv_last = UART_Recv_u8;
+//	
+//	
+//	
+//	
+//	count++;
+//	HAL_UART_Receive_IT(&huart2, &UART_Recv_u8, 1);
+//}
 extern USBD_HandleTypeDef hUsbDeviceFS;
 extern unsigned char USB_Send[64];
+void SendTick();
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, USB_Send,64);
-	for(int i = 0 ; i< 64 ; i++)
-		USB_Send[i]++;
+	if(htim->Instance == TIM14)
+		USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, USB_Send,64);
+	if(htim->Instance == TIM16)
+		SendTick();
+	//for(int i = 0 ; i< 64 ; i++)
+	//	USB_Send[i]++;
 }
+
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

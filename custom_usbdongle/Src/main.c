@@ -34,7 +34,12 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define Water_Address 0x00
+#define Local_Address 0xfd
+#define Multi_Address 0xfc
 
+#define Command_Shutdown 0xff
+#define Command_GetData 0x00
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,22 +49,34 @@
 
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim14;
+TIM_HandleTypeDef htim16;
 
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
 extern USBD_HandleTypeDef hUsbDeviceFS;
+// USB repoter
+//bat  button1 button2 encode hall
 unsigned char USB_Send[64] = {0};
 unsigned char USB_Recv[64] = {0};
-unsigned char UART_Recv[512] = {0};
+unsigned char UART_Send[256] = {0};
+unsigned char UART_Recv[256] = {0};
+unsigned char UART_Recv_u8;
+int UART_Recvloc = 0;
 unsigned char USB_Event = 0;
+
+
+unsigned char Water_Flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM14_Init(void);
+static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -78,6 +95,138 @@ uint32_t USB_GetData(uint8_t *data,uint32_t dataNum)
     }
     return dataNum;
 }
+
+void RFNormalMode()
+{
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,0);
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,0);
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,1);
+}
+
+void RFConfigMode()
+{
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,1);
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,1);
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,1);
+}
+
+void RF_init()
+{
+	unsigned char data1[64] = {0xc0 ,0x00 ,0x01 ,0x2f ,0x18 ,0x04};
+	//unsigned char data2[64] = {0xc1 ,0xc1 ,0xc1 ,0x2c ,0x18 ,0x84};
+	while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) != 1);
+	RFConfigMode();
+	while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) != 1);
+	UART_Recvloc = 0;
+	HAL_Delay(50);
+	HAL_UART_Transmit(&huart2,data1,6,1000);
+	while(1);
+}
+
+void RF_Send(unsigned char *data,unsigned int len)
+{
+	while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) != 1);
+	HAL_UART_Transmit(&huart2,data,len,1000);
+}
+void SendContrlData(unsigned char dstaddr,unsigned char command,unsigned char *data)
+{
+	//head:0xff
+	//dst_addr : [4]
+	//src_addt : [5]
+	//data.....
+	//end: 0xfe
+	unsigned char send[13] = {0xff,0,0,command,data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],0xfe};
+
+	send[1] = dstaddr;
+
+	send[2] = Local_Address;
+	RF_Send(send,13);
+}
+
+void RecvTick()
+{
+	unsigned char flag = 0;
+	int location;
+	unsigned char Recv_data[64];
+	int Recv_data_len = 0;
+	unsigned char i = 0;
+	static unsigned char count = 0;
+	while(1)
+	{
+		if(UART_Recv[count] == 0xff)
+		{
+			if(flag == 1)
+			{
+				UART_Recv[location] = 0;
+			}
+			
+			location = count;
+			flag = 1;
+		}
+		if(UART_Recv[count] == 0xfe)
+		{
+			UART_Recv[count] = 0;
+			if(flag != 1)
+			{
+				continue;
+			}
+			UART_Recv[location] = 0;
+			flag = 0;
+			if(count < location)
+				Recv_data_len = (count + 256) - location;
+			else
+				Recv_data_len = count - location;
+			if(Recv_data_len >= 64)
+				continue;
+			for(int j = 0;j<Recv_data_len;j++)
+				Recv_data[j] = UART_Recv[(unsigned char)(location + 1 + j)];
+			break;
+		}
+		if(i==255)
+			break;
+		i++;
+		count++;
+	}
+	if(Recv_data_len == 0)
+		return;
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	if(Recv_data[0] != Local_Address)
+		return;
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	unsigned char check  = 0;
+
+	if(Recv_data[1] == Water_Address)
+		check = 1;
+	
+
+	
+	
+	switch(check)
+	{
+		case 1:
+			Water_Flag = 1;
+			USB_Send[0] = Recv_data[2];
+			USB_Send[1] = Recv_data[3];
+			USB_Send[2] = Recv_data[4];
+			USB_Send[3] = Recv_data[5];
+			USB_Send[4] = Recv_data[6];
+			break;
+	}
+}
+
+
+void SendTick()
+{
+	if(Water_Flag == 0)
+	{
+		SendContrlData(Water_Address,Command_GetData,"60 00   ");
+	}
+	
+	Water_Flag = 0;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -103,30 +252,58 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+	HAL_Delay(200);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
   MX_TIM14_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+	HAL_UART_Receive_DMA(&huart2, UART_Recv, 256);
+	
+	//HAL_Delay(200);
 	HAL_TIM_Base_Start_IT(&htim14);
-	HAL_UART_Receive_IT(&huart2, UART_Recv, 1);
+	HAL_TIM_Base_Start_IT(&htim16);
+	
+	
+	
+	//RF_init();
+	RFNormalMode();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	//USART2->CR1 = 0x0000010d; 
+	//	DMA1_Channel5->CCR = 0xaf;
   while (1)
   {
 		if(USB_Event == 1)
 		{
-			unsigned char len = USB_GetData(USB_Recv,128);
-			memcpy(USB_Send,USB_Recv,64);
+			//unsigned char len = USB_GetData(USB_Recv,128);
+			//HAL_UART_Transmit(&huart2,USB_Recv,len,1000);
+			//memcpy(USB_Send,USB_Recv,64);
 			USB_Event = 0;
 		}
-
+		
+//		*(unsigned int*)&USB_Send[16] = USART1->CR1;
+//		*(unsigned int*)&USB_Send[20] = USART1->CR3;
+//		*(unsigned int*)&USB_Send[24] = USART1->BRR;
+//		*(unsigned int*)&USB_Send[28] = USART1->ISR;
+//		
+//		
+//		*(unsigned int*)&USB_Send[0] = DMA1_Channel5->CCR;
+//		*(unsigned int*)&USB_Send[4] = DMA1_Channel5->CNDTR;
+//		*(unsigned int*)&USB_Send[8] = DMA1_Channel5->CPAR;
+//		*(unsigned int*)&USB_Send[12] = DMA1_Channel5->CMAR;
+		
+		
+		RecvTick();
+		//RF_Send(0x0001,0x18,"test1",5);
+		//HAL_Delay(50);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -206,6 +383,38 @@ static void MX_TIM14_Init(void)
 }
 
 /**
+  * @brief TIM16 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM16_Init(void)
+{
+
+  /* USER CODE BEGIN TIM16_Init 0 */
+
+  /* USER CODE END TIM16_Init 0 */
+
+  /* USER CODE BEGIN TIM16_Init 1 */
+
+  /* USER CODE END TIM16_Init 1 */
+  htim16.Instance = TIM16;
+  htim16.Init.Prescaler = 4799;
+  htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim16.Init.Period = 9999;
+  htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim16.Init.RepetitionCounter = 0;
+  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM16_Init 2 */
+
+  /* USER CODE END TIM16_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -221,7 +430,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 38400;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -237,6 +446,21 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel4_5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel4_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel4_5_IRQn);
 
 }
 
@@ -258,7 +482,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : PA0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
