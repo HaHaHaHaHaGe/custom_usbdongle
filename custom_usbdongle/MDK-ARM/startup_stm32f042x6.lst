@@ -430,7 +430,7 @@ ARM Macro Assembler    Page 7
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M0 --apcs=interw
 ork --depend=custom_usbdongle\startup_stm32f042x6.d -ocustom_usbdongle\startup_
-stm32f042x6.o -I.\RTE\_custom_usbdongle -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.4.0\C
+stm32f042x6.o -I.\RTE\_custom_usbdongle -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\C
 MSIS\Core\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F0xx_DFP\2.0.0\Drivers\CMSIS\
 Device\ST\STM32F0xx\Include --predefine="__MICROLIB SETA 1" --predefine="__UVIS
 ION_VERSION SETA 526" --predefine="_RTE_ SETA 1" --predefine="STM32F042x6 SETA 

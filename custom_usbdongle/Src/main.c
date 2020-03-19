@@ -35,11 +35,13 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define Water_Address 0x00
+#define Recoilless_Address 0x01
 #define Local_Address 0xfd
 #define Multi_Address 0xfc
 
 #define Command_Shutdown 0xff
 #define Command_GetData 0x00
+#define Command_SetData 0x01
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -58,6 +60,8 @@ DMA_HandleTypeDef hdma_usart2_rx;
 extern USBD_HandleTypeDef hUsbDeviceFS;
 // USB repoter
 //bat  button1 button2 encode hall
+unsigned char Recoilless_Send[64] = {0};
+
 unsigned char USB_Send[64] = {0};
 unsigned char USB_Recv[64] = {0};
 unsigned char UART_Send[256] = {0};
@@ -68,6 +72,7 @@ unsigned char USB_Event = 0;
 
 
 unsigned char Water_Flag = 0;
+unsigned char Recoilless_Flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -195,17 +200,16 @@ void RecvTick()
 		return;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	unsigned char check  = 0;
+//	unsigned char check  = 0;
 
-	if(Recv_data[1] == Water_Address)
-		check = 1;
-	
+//	if(Recv_data[1] == Water_Address)
+//		check = 1;
+//	if(Recv_data[1] == Recoilless_Address)
+//		check = 2;
 
-	
-	
-	switch(check)
+	switch(Recv_data[1])
 	{
-		case 1:
+		case Water_Address:
 			Water_Flag = 1;
 			USB_Send[0] = Recv_data[2];
 			USB_Send[1] = Recv_data[3];
@@ -213,18 +217,37 @@ void RecvTick()
 			USB_Send[3] = Recv_data[5];
 			USB_Send[4] = Recv_data[6];
 			break;
+		case Recoilless_Address:
+			Recoilless_Flag = 1;
+			//USB_Send[5] = 
+			break;
 	}
 }
 
-
+unsigned char Send_Tick_Count100ms = 0;
 void SendTick()
 {
-	if(Water_Flag == 0)
+	///////////////////////////////////////////////////////////////////////////
+	if(Water_Flag == 0 || Recoilless_Flag == 0)
 	{
-		SendContrlData(Water_Address,Command_GetData,"60 00   ");
+		Send_Tick_Count100ms++;
+		if(Send_Tick_Count100ms >= 10)
+		{
+			Send_Tick_Count100ms = 0;
+			SendContrlData(Water_Address,Command_GetData,"60 00   ");
+			SendContrlData(Recoilless_Address,Command_GetData,"60 20   ");
+		}
+	}
+	else
+	{
+		Send_Tick_Count100ms = 10;
+		SendContrlData(Recoilless_Address,Command_SetData,Recoilless_Send);
 	}
 	
 	Water_Flag = 0;
+	Recoilless_Flag = 0;
+	///////////////////////////////////////////////////////////////////////////
+	
 }
 
 /* USER CODE END 0 */
@@ -283,7 +306,11 @@ int main(void)
   {
 		if(USB_Event == 1)
 		{
-			//unsigned char len = USB_GetData(USB_Recv,128);
+			unsigned char len = USB_GetData(USB_Recv,64);
+			if(USB_Recv[0] == Recoilless_Address)
+			{
+				Recoilless_Send[0] = USB_Recv[1];
+			}
 			//HAL_UART_Transmit(&huart2,USB_Recv,len,1000);
 			//memcpy(USB_Send,USB_Recv,64);
 			USB_Event = 0;
@@ -400,7 +427,7 @@ static void MX_TIM16_Init(void)
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 4799;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 9999;
+  htim16.Init.Period = 999;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;

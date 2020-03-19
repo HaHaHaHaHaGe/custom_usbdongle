@@ -147,7 +147,6 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles DMA1 channel 4 and 5 interrupts.
   */
-
 void DMA1_Channel4_5_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel4_5_IRQn 0 */
@@ -255,9 +254,10 @@ extern unsigned char USB_Send[64];
 void SendTick();
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance == TIM14)
+	if(htim->Instance == TIM14) //10ms
+	
 		USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, USB_Send,64);
-	if(htim->Instance == TIM16)
+	if(htim->Instance == TIM16) //1000ms
 		SendTick();
 	//for(int i = 0 ; i< 64 ; i++)
 	//	USB_Send[i]++;
