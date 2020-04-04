@@ -219,7 +219,8 @@ void RecvTick()
 			break;
 		case Recoilless_Address:
 			Recoilless_Flag = 1;
-			//USB_Send[5] = 
+			USB_Send[5] = Recv_data[2];
+			USB_Send[6] = Recv_data[3];
 			break;
 	}
 }
@@ -240,7 +241,7 @@ void SendTick()
 	}
 	else
 	{
-		Send_Tick_Count100ms = 10;
+		Send_Tick_Count100ms = 0;
 		SendContrlData(Recoilless_Address,Command_SetData,Recoilless_Send);
 	}
 	
