@@ -36,10 +36,11 @@
 /* USER CODE BEGIN PD */
 #define Water_Address 0x00
 #define Recoilless_Address 0x01
+#define HumanSensor_Address 0x02
 #define Local_Address 0xfd
 #define Multi_Address 0xfc
 
-#define Command_Shutdown 0xff
+#define Command_Shutdown 0x0f
 #define Command_GetData 0x00
 #define Command_SetData 0x01
 /* USER CODE END PD */
@@ -73,6 +74,7 @@ unsigned char USB_Event = 0;
 
 unsigned char Water_Flag = 0;
 unsigned char Recoilless_Flag = 0;
+unsigned char HumanSensor_Flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -150,8 +152,8 @@ void SendContrlData(unsigned char dstaddr,unsigned char command,unsigned char *d
 
 void RecvTick()
 {
-	unsigned char flag = 0;
-	int location;
+	static unsigned char flag = 0;
+	static int location;
 	unsigned char Recv_data[64];
 	int Recv_data_len = 0;
 	unsigned char i = 0;
@@ -222,31 +224,47 @@ void RecvTick()
 			USB_Send[5] = Recv_data[2];
 			USB_Send[6] = Recv_data[3];
 			break;
+		case HumanSensor_Address:
+			HumanSensor_Flag = 1;
+			USB_Send[7] = Recv_data[2];
+			USB_Send[8] = Recv_data[3];
+			break;
 	}
 }
 
-unsigned char Send_Tick_Count100ms = 0;
+unsigned char Send_Tick_Count80ms = 0;
 void SendTick()
 {
 	///////////////////////////////////////////////////////////////////////////
-	if(Water_Flag == 0 || Recoilless_Flag == 0)
+	if(Water_Flag == 0 || Recoilless_Flag == 0 || HumanSensor_Flag == 0)
 	{
-		Send_Tick_Count100ms++;
-		if(Send_Tick_Count100ms >= 10)
+		Send_Tick_Count80ms++;
+		if(Send_Tick_Count80ms >= 12)
 		{
-			Send_Tick_Count100ms = 0;
-			SendContrlData(Water_Address,Command_GetData,"60 00   ");
-			SendContrlData(Recoilless_Address,Command_GetData,"60 20   ");
+			Send_Tick_Count80ms = 0;
+			USB_Send[61] = Water_Flag;
+			USB_Send[62] = Recoilless_Flag;
+			USB_Send[63] = HumanSensor_Flag;
+			SendContrlData(Water_Address,Command_GetData,"80 20   ");
+			SendContrlData(Recoilless_Address,Command_GetData,"80 40   ");
+			SendContrlData(HumanSensor_Address,Command_GetData,"80 60   ");
 		}
 	}
 	else
 	{
-		Send_Tick_Count100ms = 0;
+		Send_Tick_Count80ms = 0;
+		USB_Send[61] = 1;
+		USB_Send[62] = 1;
+		USB_Send[63] = 1;
 		SendContrlData(Recoilless_Address,Command_SetData,Recoilless_Send);
 	}
 	
+	
+	
+	
 	Water_Flag = 0;
 	Recoilless_Flag = 0;
+	HumanSensor_Flag = 0;
 	///////////////////////////////////////////////////////////////////////////
 	
 }
@@ -308,10 +326,19 @@ int main(void)
 		if(USB_Event == 1)
 		{
 			unsigned char len = USB_GetData(USB_Recv,64);
-			if(USB_Recv[0] == Recoilless_Address)
+			switch(USB_Recv[0])
 			{
-				Recoilless_Send[0] = USB_Recv[1];
+				case Recoilless_Address:
+					Recoilless_Send[0] = USB_Recv[1];
+					break;
+				case HumanSensor_Address:
+					SendContrlData(HumanSensor_Address,Command_Shutdown,"        ");
+					break;
+				case Water_Address:
+					SendContrlData(Water_Address,Command_Shutdown,"        ");
+					break;
 			}
+
 			//HAL_UART_Transmit(&huart2,USB_Recv,len,1000);
 			//memcpy(USB_Send,USB_Recv,64);
 			USB_Event = 0;
@@ -428,7 +455,7 @@ static void MX_TIM16_Init(void)
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 4799;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 999;
+  htim16.Init.Period = 799;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
