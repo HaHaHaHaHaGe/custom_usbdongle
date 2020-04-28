@@ -119,7 +119,7 @@ void RFConfigMode()
 
 void RF_init()
 {
-	unsigned char data1[64] = {0xc0 ,0x00 ,0x01 ,0x2f ,0x18 ,0x04};
+	unsigned char data1[64] = {0xc0 ,0x00 ,0x03 ,0x2f ,0x1a ,0x04};
 	//unsigned char data2[64] = {0xc1 ,0xc1 ,0xc1 ,0x2c ,0x18 ,0x84};
 	while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0) != 1);
 	RFConfigMode();
@@ -232,19 +232,61 @@ void RecvTick()
 	}
 }
 
-unsigned char Send_Tick_Count80ms = 0;
+unsigned char Send_Tick_WaterCount80ms = 0;
+unsigned char Send_Tick_RecoillessCount80ms = 0;
+unsigned char Send_Tick_HumanSensorCount80ms = 0;
+
+unsigned char Send_Tick_RadioCount80ms = 0;
 void SendTick()
 {
 	///////////////////////////////////////////////////////////////////////////
-	if(Water_Flag == 0 || Recoilless_Flag == 0 || HumanSensor_Flag == 0)
+	if(Water_Flag == 0)
 	{
-		Send_Tick_Count80ms++;
-		if(Send_Tick_Count80ms >= 12)
+		Send_Tick_WaterCount80ms++;
+		if(Send_Tick_WaterCount80ms >= 12)
 		{
-			Send_Tick_Count80ms = 0;
-			USB_Send[61] = Water_Flag;
-			USB_Send[62] = Recoilless_Flag;
-			USB_Send[63] = HumanSensor_Flag;
+			USB_Send[61] = 0;
+		}
+	}
+	else
+	{
+		Send_Tick_WaterCount80ms = 0;
+		USB_Send[61] = 1;
+	}
+	if(Recoilless_Flag == 0)
+	{
+		Send_Tick_RecoillessCount80ms++;
+		if(Send_Tick_RecoillessCount80ms >= 12)
+		{
+			USB_Send[62] = 0;
+		}
+	}	
+	else
+	{
+		Send_Tick_RecoillessCount80ms = 0;
+		USB_Send[62] = 1;
+	}
+	
+	if(HumanSensor_Flag == 0)
+	{
+		Send_Tick_HumanSensorCount80ms++;
+		if(Send_Tick_HumanSensorCount80ms >= 12)
+		{
+			USB_Send[63] = 0;
+		}
+	}	
+	else
+	{
+		Send_Tick_HumanSensorCount80ms = 0;
+		USB_Send[63] = 1;
+	}
+	
+	
+	if(USB_Send[61] == 0 || USB_Send[62] == 0)// || USB_Send[63] == 0)
+	{
+		Send_Tick_RadioCount80ms++;
+		if(Send_Tick_RadioCount80ms >= 12)
+		{
 			SendContrlData(Water_Address,Command_GetData,"80 20   ");
 			SendContrlData(Recoilless_Address,Command_GetData,"80 40   ");
 			SendContrlData(HumanSensor_Address,Command_GetData,"80 60   ");
@@ -252,14 +294,12 @@ void SendTick()
 	}
 	else
 	{
-		Send_Tick_Count80ms = 0;
-		USB_Send[61] = 1;
-		USB_Send[62] = 1;
-		USB_Send[63] = 1;
+		Send_Tick_RadioCount80ms = 0;
+	}
+	if(USB_Send[61] != 0 && USB_Send[62] != 0)
+	{
 		SendContrlData(Recoilless_Address,Command_SetData,Recoilless_Send);
 	}
-	
-	
 	
 	
 	Water_Flag = 0;
