@@ -334,11 +334,14 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-	HAL_Delay(200);
+	
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+	RFNormalMode();
+	//RFConfigMode();
+	HAL_Delay(200);
   MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
@@ -354,7 +357,7 @@ int main(void)
 	
 	
 	//RF_init();
-	RFNormalMode();
+	//RFNormalMode();
   /* USER CODE END 2 */
 
   /* Infinite loop */
