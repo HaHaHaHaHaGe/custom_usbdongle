@@ -37,6 +37,7 @@
 #define Water_Address 0x00
 #define Recoilless_Address 0x01
 #define HumanSensor_Address 0x02
+#define PneumaticExtinguisher_Address 0x03
 #define Local_Address 0xfd
 #define Multi_Address 0xfc
 
@@ -75,6 +76,7 @@ unsigned char USB_Event = 0;
 unsigned char Water_Flag = 0;
 unsigned char Recoilless_Flag = 0;
 unsigned char HumanSensor_Flag = 0;
+unsigned char PneumaticExtinguisher_Flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -229,23 +231,49 @@ void RecvTick()
 			USB_Send[7] = Recv_data[2];
 			USB_Send[8] = Recv_data[3];
 			break;
+		case PneumaticExtinguisher_Address:
+			PneumaticExtinguisher_Flag = 1;
+			USB_Send[0] = Recv_data[2];
+			USB_Send[1] = Recv_data[3];
+			USB_Send[2] = Recv_data[4];
+			break;
 	}
 }
 
 unsigned char Send_Tick_WaterCount80ms = 0;
 unsigned char Send_Tick_RecoillessCount80ms = 0;
 unsigned char Send_Tick_HumanSensorCount80ms = 0;
-
+unsigned char Send_Tick_PneumaticExtinguisherCount80ms = 0;
 unsigned char Send_Tick_RadioCount80ms = 0;
 void SendTick()
 {
 	///////////////////////////////////////////////////////////////////////////
+	if(PneumaticExtinguisher_Flag == 0)
+	{
+		if(Send_Tick_PneumaticExtinguisherCount80ms >= 12)
+		{
+			USB_Send[60] = 0;
+		}
+		else
+		{
+			Send_Tick_PneumaticExtinguisherCount80ms++;
+		}
+	}
+	else
+	{
+		Send_Tick_PneumaticExtinguisherCount80ms = 0;
+		USB_Send[60] = 1;
+	}
 	if(Water_Flag == 0)
 	{
-		Send_Tick_WaterCount80ms++;
+		
 		if(Send_Tick_WaterCount80ms >= 12)
 		{
 			USB_Send[61] = 0;
+		}
+		else
+		{
+			Send_Tick_WaterCount80ms++;
 		}
 	}
 	else
@@ -255,10 +283,14 @@ void SendTick()
 	}
 	if(Recoilless_Flag == 0)
 	{
-		Send_Tick_RecoillessCount80ms++;
+		
 		if(Send_Tick_RecoillessCount80ms >= 12)
 		{
 			USB_Send[62] = 0;
+		}
+		else
+		{
+			Send_Tick_RecoillessCount80ms++;
 		}
 	}	
 	else
@@ -269,10 +301,14 @@ void SendTick()
 	
 	if(HumanSensor_Flag == 0)
 	{
-		Send_Tick_HumanSensorCount80ms++;
+		
 		if(Send_Tick_HumanSensorCount80ms >= 12)
 		{
 			USB_Send[63] = 0;
+		}
+		else
+		{
+			Send_Tick_HumanSensorCount80ms++;
 		}
 	}	
 	else
@@ -281,26 +317,29 @@ void SendTick()
 		USB_Send[63] = 1;
 	}
 	
-	
-	if(USB_Send[61] == 0 || USB_Send[62] == 0)// || USB_Send[63] == 0)
+	if(USB_Send[60] == 0)
 	{
-		Send_Tick_RadioCount80ms++;
-		if(Send_Tick_RadioCount80ms >= 12)
+	
+		if(USB_Send[61] == 0 || USB_Send[62] == 0)// || USB_Send[63] == 0)
 		{
-			SendContrlData(Water_Address,Command_GetData,"80 20   ");
-			SendContrlData(Recoilless_Address,Command_GetData,"80 40   ");
-			SendContrlData(HumanSensor_Address,Command_GetData,"80 60   ");
+			Send_Tick_RadioCount80ms++;
+			if(Send_Tick_RadioCount80ms >= 12)
+			{
+				SendContrlData(PneumaticExtinguisher_Address,Command_GetData,"80 20   ");
+				SendContrlData(Water_Address,Command_GetData,"80 20   ");
+				SendContrlData(Recoilless_Address,Command_GetData,"80 40   ");
+				SendContrlData(HumanSensor_Address,Command_GetData,"80 60   ");
+			}
+		}
+		else
+		{
+			Send_Tick_RadioCount80ms = 0;
+		}
+		if(USB_Send[61] != 0 && USB_Send[62] != 0)
+		{
+			SendContrlData(Recoilless_Address,Command_SetData,Recoilless_Send);
 		}
 	}
-	else
-	{
-		Send_Tick_RadioCount80ms = 0;
-	}
-	if(USB_Send[61] != 0 && USB_Send[62] != 0)
-	{
-		SendContrlData(Recoilless_Address,Command_SetData,Recoilless_Send);
-	}
-	
 	
 	Water_Flag = 0;
 	Recoilless_Flag = 0;

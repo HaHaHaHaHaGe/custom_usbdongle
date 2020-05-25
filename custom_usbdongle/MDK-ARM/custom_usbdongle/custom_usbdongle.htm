@@ -3,7 +3,7 @@
 <title>Static Call Graph - [custom_usbdongle\custom_usbdongle.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image custom_usbdongle\custom_usbdongle.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed Apr 29 12:39:04 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Wed May 20 14:40:07 2020
 <BR><P>
 <H3>Maximum Stack Usage =        252 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -755,7 +755,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SendContrlData
 </UL>
 
-<P><STRONG><a name="[d2]"></a>RecvTick</STRONG> (Thumb, 326 bytes, Stack size 72 bytes, main.o(i.RecvTick))
+<P><STRONG><a name="[d2]"></a>RecvTick</STRONG> (Thumb, 358 bytes, Stack size 72 bytes, main.o(i.RecvTick))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = RecvTick
 </UL>
 <BR>[Called By]<UL><LI><a href="#[33]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -773,7 +773,7 @@ Global Symbols
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SendTick
 </UL>
 
-<P><STRONG><a name="[7b]"></a>SendTick</STRONG> (Thumb, 254 bytes, Stack size 8 bytes, main.o(i.SendTick))
+<P><STRONG><a name="[7b]"></a>SendTick</STRONG> (Thumb, 326 bytes, Stack size 8 bytes, main.o(i.SendTick))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = SendTick &rArr; SendContrlData &rArr; RF_Send &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SendContrlData
