@@ -28,6 +28,7 @@ custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_
 custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_flash_ex.h
 custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c.h
 custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_i2c_ex.h
+custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_iwdg.h
 custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pcd.h
 custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pcd_ex.h
 custom_usbdongle\usbd_core.o: ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h

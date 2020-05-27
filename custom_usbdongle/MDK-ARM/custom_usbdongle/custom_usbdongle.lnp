@@ -9,6 +9,7 @@
 "custom_usbdongle\stm32f0xx_hal_msp.o"
 "custom_usbdongle\stm32f0xx_hal_pcd.o"
 "custom_usbdongle\stm32f0xx_hal_pcd_ex.o"
+"custom_usbdongle\stm32f0xx_hal_iwdg.o"
 "custom_usbdongle\stm32f0xx_hal_tim.o"
 "custom_usbdongle\stm32f0xx_hal_tim_ex.o"
 "custom_usbdongle\stm32f0xx_hal_uart.o"
