@@ -302,23 +302,23 @@ void SendTick()
 		USB_Send[62] = 1;
 	}
 	
-	if(HumanSensor_Flag == 0)
-	{
-		
-		if(Send_Tick_HumanSensorCount80ms >= 12)
-		{
-			USB_Send[63] = 0;
-		}
-		else
-		{
-			Send_Tick_HumanSensorCount80ms++;
-		}
-	}	
-	else
-	{
-		Send_Tick_HumanSensorCount80ms = 0;
-		USB_Send[63] = 1;
-	}
+//	if(HumanSensor_Flag == 0)
+//	{
+//		
+//		if(Send_Tick_HumanSensorCount80ms >= 12)
+//		{
+//			USB_Send[63] = 0;
+//		}
+//		else
+//		{
+//			Send_Tick_HumanSensorCount80ms++;
+//		}
+//	}	
+//	else
+//	{
+//		Send_Tick_HumanSensorCount80ms = 0;
+//		USB_Send[63] = 1;
+//	}
 	
 	if(USB_Send[60] == 0)
 	{
@@ -331,7 +331,7 @@ void SendTick()
 				SendContrlData(PneumaticExtinguisher_Address,Command_GetData,"80 20   ");
 				SendContrlData(Water_Address,Command_GetData,"80 20   ");
 				SendContrlData(Recoilless_Address,Command_GetData,"80 40   ");
-				SendContrlData(HumanSensor_Address,Command_GetData,"80 60   ");
+				//SendContrlData(HumanSensor_Address,Command_GetData,"80 60   ");
 			}
 		}
 		else
